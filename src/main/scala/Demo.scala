@@ -6,7 +6,7 @@ object Demo {
     val conf = new SparkConf()
     val sc = new SparkContext()
 
-    val input = sc.textFile("aa.txt")
+    val input = sc.textFile("file:////home/zpltys/graphx/a.out")
     val result = input.map(s => 1).reduce(_ + _)
     println(result)
   }
