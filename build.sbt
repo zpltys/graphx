@@ -2,7 +2,11 @@ name := "graphx"
 
 version := "1.0"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.4"
+
+libraryDependencies += "org.apache.spark" %% "spark-core" % "2.0.0"
+libraryDependencies += "org.apache.spark" %% "spark-graphx" % "2.0.0"
+
 
 assemblyMergeStrategy in assembly := {
   case PathList(ps @ _*) if ps.last endsWith ".properties" => MergeStrategy.first
