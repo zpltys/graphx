@@ -46,6 +46,6 @@ object Demo {
     )
     //val fileWriter = new FileWriter("/home/zpltys/ans.out")
     val ans = sssp.vertices.collect
-    ans.foreach(print(_))
+    ans.foreach(println(_))
   }
 }
