@@ -44,7 +44,8 @@ object Demo {
       },
       (a, b) => math.min(a, b) // Merge Message
     )
-    val fileWriter = new FileWriter("/home/zpltys/ans.out")
-    fileWriter.write(sssp.vertices.collect.mkString("\n"))
+    //val fileWriter = new FileWriter("/home/zpltys/ans.out")
+    val ans = sssp.vertices.collect
+    ans.foreach(print(_))
   }
 }
