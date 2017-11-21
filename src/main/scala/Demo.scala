@@ -22,7 +22,7 @@ object Demo {
     }).distinct().map(u => (u, 0L))
 
     val edge = data.flatMap(e => {
-      Seq(Edge(e._1, e._2, 1.0), Edge(e._2, e._1, 1.0)))
+      Seq(Edge(e._1, e._2, 1.0), Edge(e._2, e._1, 1.0))
     }).distinct()
 
     // $example on$
