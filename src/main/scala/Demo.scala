@@ -5,6 +5,7 @@ import org.apache.spark.rdd.RDD
 object Demo {
 
   def main(args: Array[String]): Unit = {
+    val sc = new SparkContext()
     val users: RDD[(VertexId, (String, String))] =
       sc.parallelize(Array((3L, ("rxin", "student")), (7L, ("jgonzal", "postdoc")),
         (5L, ("franklin", "prof")), (2L, ("istoica", "prof")),
