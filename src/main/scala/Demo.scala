@@ -1,24 +1,35 @@
 import org.apache.spark._
 import org.apache.spark.graphx._
-import org.apache.spark.graphx.util.GraphGenerators
+import java.io.FileWriter
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.SparkSession
 
 object Demo {
 
   def main(args: Array[String]): Unit = {
     // Creates a SparkSession.
-    val spark = SparkSession
-      .builder
-      .appName(s"${this.getClass.getSimpleName}")
-      .getOrCreate()
-    val sc = spark.sparkContext
+    val conf = new SparkConf()
+    val sc = new SparkContext()
+
+    val data: RDD[(VertexId, VertexId)] = sc.textFile("file:///home/zpltys/data/text.txt").map(s => {
+      val d = s.split('\t')
+      val u = d(0).toLong
+      val v = d(1).toLong
+      (u, v)
+    }).cache()
+
+    val vertex = data.flatMap(e => {
+      Seq[VertexId](e._1, e._2)
+    }).distinct().map(u => (u, 0L))
+
+    val edge = data.flatMap(e => {
+      Seq(Edge(e._1, e._2, 1.0), Edge(e._2, e._1, 1.0)))
+    }).distinct()
 
     // $example on$
     // A graph with edge attributes containing distances
-    val graph: Graph[Long, Double] =
-    GraphGenerators.logNormalGraph(sc, numVertices = 10000000).mapEdges(e => e.attr.toDouble)
-    val sourceId: VertexId = 42 // The ultimate source
+    val graph: Graph[Long, Double] = Graph(vertex, edge)
+
+    val sourceId: VertexId = 0 // The ultimate source
     // Initialize the graph such that all vertices except the root have distance infinity.
     val initialGraph = graph.mapVertices((id, _) =>
       if (id == sourceId) 0.0 else Double.PositiveInfinity)
@@ -33,9 +44,7 @@ object Demo {
       },
       (a, b) => math.min(a, b) // Merge Message
     )
-    println(sssp.vertices.collect.mkString("\n"))
-    // $example off$
-
-    spark.stop()
+    val fileWriter = new FileWriter("/home/zpltys/ans.out")
+    fileWriter.write(sssp.vertices.collect.mkString("\n"))
   }
 }
