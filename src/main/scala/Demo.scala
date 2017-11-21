@@ -21,6 +21,7 @@ object Demo {
     val graph = Graph(users, relationships, defaultUser)
     // Notice that there is a user 0 (for which we have no information) connected to users
     // 4 (peter) and 5 (franklin).
+
     graph.triplets.map(
       triplet => triplet.srcAttr._1 + " is the " + triplet.attr + " of " + triplet.dstAttr._1
     ).collect.foreach(println(_))
