@@ -1,6 +1,5 @@
 import org.apache.spark._
 import org.apache.spark.graphx._
-import java.io.FileWriter
 import org.apache.spark.rdd.RDD
 
 object Demo {
@@ -19,7 +18,7 @@ object Demo {
 
     val vertex = data.flatMap(e => {
       Seq((e._1, 1L), (e._2, 1L))
-    })
+    }).distinct()
 
     val edge = data.map(e => {
       Edge(e._1, e._2, 1.0)
