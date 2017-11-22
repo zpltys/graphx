@@ -10,7 +10,7 @@ object Demo {
     val conf = new SparkConf()
     val sc = new SparkContext()
 
-    val data: RDD[(VertexId, VertexId)] = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/text.txt").map(s => {
+    val data: RDD[(VertexId, VertexId)] = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/com-lj.ungraph.txt").map(s => {
       val d = s.split('\t')
       val u = d(0).toLong
       val v = d(1).toLong
@@ -18,11 +18,11 @@ object Demo {
     }).cache()
 
     val vertex = data.flatMap(e => {
-      Seq[VertexId](e._1, e._2)
-    }).map(u => (u, 0L))
+      Seq((e._1, 1L), (e._2, 1L))
+    })
 
-    val edge = data.flatMap(e => {
-      Seq(Edge(e._1, e._2, 1.0), Edge(e._2, e._1, 1.0))
+    val edge = data.map(e => {
+      Edge(e._1, e._2, 1.0)
     })
 
     // $example on$
