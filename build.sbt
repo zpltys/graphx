@@ -9,7 +9,7 @@ libraryDependencies += "org.apache.spark" %% "spark-graphx" % "2.0.0"
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.0.0"
 
 // https://mvnrepository.com/artifact/org.alluxio/alluxio-core-client-internal
-libraryDependencies += "org.alluxio" % "alluxio-core-client-internal" % "1.0.1"
+//libraryDependencies += "org.alluxio" % "alluxio-core-client-internal" % "1.0.1"
 
 
 assemblyMergeStrategy in assembly := {
