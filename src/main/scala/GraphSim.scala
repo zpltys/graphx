@@ -58,7 +58,7 @@ object GraphSim {
     val tempG = graph.joinVertices(postGraph)((_, postSet, buffer) => {
       buffer ++ postSet
     }).mapVertices((id, postSet) => {
-      val array = Array[Int](n + 1)
+      val array = new Array[Int](n + 1)
       for (i <- 1 to n) {
         if (post(i).isEmpty) array(i) = 1
         else array(i) = if (postSet.nonEmpty) 1 else 0
