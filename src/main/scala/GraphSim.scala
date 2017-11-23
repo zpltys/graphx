@@ -2,27 +2,26 @@ import org.apache.spark._
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
 
-import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable
 
 object GraphSim {
   val n = 6
-  val post = new Array[ArrayBuffer[Int]](n + 1)
-  val pre = new Array[ArrayBuffer[Int]](n + 1)
+  val post = new Array[mutable.Set[VertexId]](n + 1)
+  val pre = new Array[mutable.Set[VertexId]](n + 1)
 
   def generatePattern(): Unit = {
-    post(1) = ArrayBuffer(2, 3)
-    post(2) = ArrayBuffer(4, 5)
-    post(3) = ArrayBuffer(6)
-    post(4) = ArrayBuffer(3)
-    post(5) = ArrayBuffer(6)
-    post(6) = ArrayBuffer()
+    post(1) = mutable.Set[VertexId](2L, 3L)
+    post(2) = mutable.Set[VertexId](4L, 5L)
+    post(3) = mutable.Set[VertexId](6L)
+    post(4) = mutable.Set[VertexId](3L)
+    post(5) = mutable.Set[VertexId](6L)
+    post(6) = mutable.Set[VertexId]()
 
-    for(i <- 1 to n) {
-      pre(i) = ArrayBuffer()
-      for(j <- 1 to n) {
-        if(post(j).contains(i)) {
-          pre(i) += j
+    for (i <- 1 to n) {
+      pre(i) = mutable.Set[VertexId]()
+      for (j <- 1 to n) {
+        if (post(j).contains(i.toLong)) {
+          pre(i) += j.toLong
         }
       }
     }
@@ -32,7 +31,7 @@ object GraphSim {
     generatePattern()
 
     val sc = new SparkContext()
-    val data: RDD[(VertexId, VertexId)] = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/com-lj.ungraph.txt", minPartitions = 10).map(s => {
+    val data: RDD[(VertexId, VertexId)] = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/test.txt", minPartitions = 10).map(s => {
       val d = s.split('\t')
       val u = d(0).toLong
       val v = d(1).toLong
@@ -61,8 +60,8 @@ object GraphSim {
     }).mapVertices((id, postSet) => {
       val array = Array[Int](n + 1)
       for (i <- 1 to n) {
-        if(post(i).isEmpty) array(i) = 1
-        else array(i) = if(postSet.nonEmpty) 1 else 0
+        if (post(i).isEmpty) array(i) = 1
+        else array(i) = if (postSet.nonEmpty) 1 else 0
       }
       array
     }).cache()
@@ -77,16 +76,16 @@ object GraphSim {
 
     val initialGraph = tempG.mapVertices((_, array) => {
       val nowSet = mutable.Set[VertexId]()
-      for(i <- 1 to n) {
-        if(array(i) == 1) nowSet.add(i)
+      for (i <- 1 to n) {
+        if (array(i) == 1) nowSet.add(i)
       }
       (nowSet, mutable.Set[VertexId](), new Array[Int](n + 1))
     }).joinVertices(postCount)((_, attr, msg) => {
       val deleteSet = mutable.Set[VertexId]()
-      for(i <- 1 to n) {
-        if(msg(i) == 0) {
-          for(j <- pre(i)) {
-            if(attr._1.contains(j))
+      for (i <- 1 to n) {
+        if (msg(i) == 0) {
+          for (j <- pre(i)) {
+            if (attr._1.contains(j))
               deleteSet += j
           }
         }
@@ -94,7 +93,46 @@ object GraphSim {
       (attr._1, deleteSet, msg)
     })
 
-    initialGraph.pregel(new Array[VertexId](n + 1), Int.MaxValue, EdgeDirection.In)
+    val finalGraph = initialGraph.pregel(new Array[Int](n + 1), Int.MaxValue, EdgeDirection.In)(
+      (id, attr, msg) => {
+        val nowSet = attr._1
+        var deleteSet = attr._2
+        val postArray = attr._3
+        nowSet --= deleteSet
+        deleteSet = mutable.Set[VertexId]()
+        for (i <- 1 to n) {
+          if (msg(i) != 0) {
+            postArray(i) -= msg(i)
+            if (postArray(i) == 0) {
+              deleteSet ++= nowSet & pre(i)
+            }
+          }
+        }
+        (nowSet, deleteSet, postArray)
+      }, triplet => {
+        if (triplet.dstAttr._2.isEmpty) {
+          Iterator.empty
+        } else {
+          val msg = new Array[Int](n + 1)
+          for (s <- triplet.dstAttr._2) {
+            msg(s.toInt) = 1
+          }
+          Iterator((triplet.srcId, msg))
+        }
+      }, (a, b) => {
+        for (i <- 1 to n) {
+          a(i) += b(i)
+        }
+        a
+      })
+
+    finalGraph.vertices.flatMap(v => {
+      val buffer = new mutable.ArrayBuffer[(VertexId, mutable.Set[VertexId])]()
+      for (s <- v._2._1) {
+        buffer.append((s, mutable.Set(v._1)))
+      }
+      buffer
+    }).reduceByKey(_ ++ _).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/sim")
 
     sc.stop()
   }
