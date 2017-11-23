@@ -31,7 +31,7 @@ object GraphSim {
     generatePattern()
 
     val sc = new SparkContext()
-    val data: RDD[(VertexId, VertexId)] = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/test.txt", minPartitions = 10).map(s => {
+    val data: RDD[(VertexId, VertexId)] = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/com-lj.ungraph.txt", minPartitions = 10).map(s => {
       val d = s.split('\t')
       val u = d(0).toLong
       val v = d(1).toLong
@@ -127,12 +127,12 @@ object GraphSim {
       })
 
     finalGraph.vertices.flatMap(v => {
-      val buffer = new mutable.ArrayBuffer[(VertexId, mutable.Set[VertexId])]()
+      val buffer = new mutable.ArrayBuffer[(VertexId, VertexId)]()
       for (s <- v._2._1) {
-        buffer.append((s, mutable.Set(v._1)))
+        buffer.append((s, v._1))
       }
       buffer
-    }).reduceByKey(_ ++ _).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/sim")
+    }).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/sim")
 
     sc.stop()
   }
