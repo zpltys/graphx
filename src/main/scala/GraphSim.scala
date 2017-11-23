@@ -13,8 +13,8 @@ object GraphSim {
     post(1) = mutable.Set[VertexId](2L, 3L)
     post(2) = mutable.Set[VertexId](4L, 5L)
     post(3) = mutable.Set[VertexId](6L)
-    post(4) = mutable.Set[VertexId](3L)
-    post(5) = mutable.Set[VertexId](6L)
+    post(4) = mutable.Set[VertexId]()
+    post(5) = mutable.Set[VertexId]()
     post(6) = mutable.Set[VertexId]()
 
     for (i <- 1 to n) {
