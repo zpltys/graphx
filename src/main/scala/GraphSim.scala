@@ -36,14 +36,14 @@ object GraphSim {
     generatePattern()
 
     val sc = new SparkContext()
-    val edge = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = 100).map(s => {
+    val edge = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = 30).map(s => {
       val d = s.split('\t')
       val u = d(0).toLong
       val v = d(1).toLong
       Edge(u, v, 0)
     })
 
-    val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = 50).map(line => {
+    val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = 10).map(line => {
       val msg = line.split('\t')
       val id = msg(0).toLong
       val label = msg(1).toInt
