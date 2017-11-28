@@ -61,7 +61,7 @@ object GraphSim {
     }).reduceByKey(_ ++ _)
 
 
-    //initial sim
+    //initial sim test for gitlab
     val tempG = graph.joinVertices(postGraph)((_, postSet, buffer) => {
       (postSet._1, buffer ++ postSet._2)
     }).mapVertices((_, postSet) => {
