@@ -40,7 +40,7 @@ object GraphSim {
       val d = s.split('\t')
       val u = d(0).toLong
       val v = d(1).toLong
-      Edge(u, v)
+      Edge(u, v, 0)
     })
 
     val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = 5).map(line => {
