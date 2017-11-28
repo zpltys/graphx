@@ -34,34 +34,47 @@ object GraphSim {
 
   def main(args: Array[String]): Unit = {
     generatePattern()
-
     val sc = new SparkContext()
-    val edge = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = 30).map(s => {
-      val d = s.split('\t')
-      val u = d(0).toLong
-      val v = d(1).toLong
-      Edge(u, v, 0)
-    })
 
-    val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = 10).map(line => {
+    val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = 10).flatMap(line => {
       val msg = line.split('\t')
       val id = msg(0).toLong
       val label = msg(1).toInt
-      (id, (label, mutable.Set[VertexId]()))
+      if(label <= n) {
+        Some((id, (label, mutable.Set[VertexId]())))
+      } else None
+    }).cache()
+
+    println("zs-log: vertex.size:" + vertex.count())
+
+
+    val tmpPair = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = 30).map(s => {
+      val d = s.split('\t')
+      val u = d(0).toLong
+      val v = d(1).toLong
+      (u, v)
     })
 
-    println("zs-log: finish load data")
+    val filterU = tmpPair.join(vertex).map(tuple => (tuple._2._1, tuple._1))
+    val filterV = filterU.join(vertex).map(tuple => (tuple._2._1, tuple._1))
+    val edge = filterV.map(e => Edge(e._1, e._2, 0))
 
+    println("zs-log: edge.size:" + edge.count())
 
     val graph = Graph(vertex, edge).cache()
+
+    edge.unpersist()
+    vertex.unpersist()
 
     //calculate post set of data graph
     val postGraph = graph.edges.map(e => {
       (e.srcId, mutable.Set[VertexId](e.dstId))
-    }).reduceByKey(_ ++ _)
+    }).reduceByKey(_ ++ _).cache()
 
+    println("zs-log: postGraph:" + postGraph.count())
+    postGraph.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/postGraph")
 
-    //initial sim test for gitlab
+    //initial sim
     val tempG = graph.joinVertices(postGraph)((_, postSet, buffer) => {
       (postSet._1, buffer ++ postSet._2)
     }).mapVertices((_, postSet) => {
@@ -76,7 +89,12 @@ object GraphSim {
       array
     }).cache()
 
+    postGraph.unpersist()
     graph.unpersist()
+
+
+    println("zs-log: tempG.vertices:" + tempG.vertices.count())
+
 
     val postCount = tempG.triplets.map(triplets => {
       (triplets.srcId, triplets.dstAttr)
