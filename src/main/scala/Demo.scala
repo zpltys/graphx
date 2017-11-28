@@ -44,5 +44,7 @@ object Demo {
       (a, b) => math.min(a, b) // Merge Message
     )
     sssp.vertices.map( vertex => (vertex._1, vertex._2)).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/result")
+
+    sc.stop()
   }
 }

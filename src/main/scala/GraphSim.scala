@@ -5,19 +5,24 @@ import org.apache.spark.rdd.RDD
 import scala.collection.mutable
 
 object GraphSim {
-  val n = 6
+  val n = 8
   val post = new Array[mutable.Set[VertexId]](n + 1)
   val pre = new Array[mutable.Set[VertexId]](n + 1)
+  val vecType = new Array[Int](n + 1)
 
   def generatePattern(): Unit = {
     post(1) = mutable.Set[VertexId](2L, 3L)
-    post(2) = mutable.Set[VertexId](4L, 5L)
-    post(3) = mutable.Set[VertexId](6L)
-    post(4) = mutable.Set[VertexId]()
-    post(5) = mutable.Set[VertexId]()
-    post(6) = mutable.Set[VertexId]()
+    post(2) = mutable.Set[VertexId](4L, 8L)
+    post(3) = mutable.Set[VertexId](4L, 7L)
+    post(4) = mutable.Set[VertexId](1L, 8L)
+    post(5) = mutable.Set[VertexId](3L, 6L, 8L)
+    post(6) = mutable.Set[VertexId](2L, 7L)
+    post(7) = mutable.Set[VertexId](4L)
+    post(8) = mutable.Set[VertexId](4L)
 
     for (i <- 1 to n) {
+      vecType(i) = i
+
       pre(i) = mutable.Set[VertexId]()
       for (j <- 1 to n) {
         if (post(j).contains(i.toLong)) {
@@ -31,40 +36,48 @@ object GraphSim {
     generatePattern()
 
     val sc = new SparkContext()
-    val data: RDD[(VertexId, VertexId)] = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/com-lj.ungraph.txt", minPartitions = 10).map(s => {
+    val edge = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = 10).map(s => {
       val d = s.split('\t')
       val u = d(0).toLong
       val v = d(1).toLong
-      (u, v)
-    }).cache()
+      Edge(u, v)
+    })
+
+    val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = 5).map(line => {
+      val msg = line.split('\t')
+      val id = msg(0).toLong
+      val label = msg(1).toInt
+      (id, (label, mutable.Set[VertexId]()))
+    })
 
     println("zs-log: finish load data")
-    val vertex = data.flatMap(e => {
-      Array((e._1, mutable.Set[VertexId]()), (e._2, mutable.Set[VertexId]()))
-    }).distinct()
 
-    val edge = data.map(e => {
-      Edge(e._1, e._2, 1.0)
-    })
 
     val graph = Graph(vertex, edge).cache()
 
+    //calculate post set of data graph
     val postGraph = graph.edges.map(e => {
       (e.srcId, mutable.Set[VertexId](e.dstId))
     }).reduceByKey(_ ++ _)
 
-    graph.unpersist()
 
+    //initial sim
     val tempG = graph.joinVertices(postGraph)((_, postSet, buffer) => {
-      buffer ++ postSet
-    }).mapVertices((id, postSet) => {
+      (postSet._1, buffer ++ postSet._2)
+    }).mapVertices((_, postSet) => {
       val array = new Array[Int](n + 1)
       for (i <- 1 to n) {
-        if (post(i).isEmpty) array(i) = 1
-        else array(i) = if (postSet.nonEmpty) 1 else 0
+        if (vecType(i) != postSet._1) array(i) = 0
+        else {
+          if (post(i).isEmpty) array(i) = 1
+          else array(i) = if (postSet._2.nonEmpty) 1 else 0
+        }
       }
       array
     }).cache()
+
+    graph.unpersist()
+
     val postCount = tempG.triplets.map(triplets => {
       (triplets.srcId, triplets.dstAttr)
     }).reduceByKey((a, b) => {
@@ -92,6 +105,8 @@ object GraphSim {
       }
       (attr._1, deleteSet, msg)
     })
+
+    tempG.unpersist()
 
     val finalGraph = initialGraph.pregel(new Array[Int](n + 1), Int.MaxValue, EdgeDirection.In)(
       (id, attr, msg) => {
