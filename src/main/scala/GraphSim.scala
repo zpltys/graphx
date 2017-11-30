@@ -35,9 +35,9 @@ object GraphSim {
     generatePattern()
     val sc = new SparkContext()
 
-    System.currentTimeMillis()
+    val startTime = System.currentTimeMillis()
 
-    val partition = args(1).toInt
+    val partition = args(0).toInt
 
     println("zs-log: partition:" + partition)
 
@@ -75,11 +75,14 @@ object GraphSim {
    // val filterV = filterU.join(vertex).map(tuple => (tuple._2._1, tuple._1))
    // val edge = filterV.map(e => Edge(e._1, e._2, 0))
 
-    val edge = tmpPair.map(edge => Edge(edge._1, edge._2, 0))
+    val edge = tmpPair.map(edge => Edge(edge._1, edge._2, 0)).cache()
 
     println("zs-log: edge.size:" + edge.count())
 
     val graph = Graph(vertex, edge).cache()
+
+    val loadOk = System.currentTimeMillis()
+    println("zs-log: load graph ok, load graph time:" + (loadOk - startTime) / 1000 + "s")
 
     edge.unpersist()
     vertex.unpersist()
@@ -176,6 +179,10 @@ object GraphSim {
         }
         a
       })
+
+    println("zs-log: final graph calculated, vertex size:" + finalGraph.vertices.count())
+    val stopTime = System.currentTimeMillis()
+    println("zs-log: finish calculated, calculate time:" + (stopTime - loadOk) / 1000 + "s")
 
     finalGraph.vertices.flatMap(v => {
       val buffer = new mutable.ArrayBuffer[(VertexId, VertexId)]()
