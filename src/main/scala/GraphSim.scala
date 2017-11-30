@@ -52,7 +52,7 @@ object GraphSim {
     }).cache()
    */
 
-    val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = partition * 6).map(line => {
+    val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = partition * 4).map(line => {
       val msg = line.split('\t')
       val id = msg(0).toLong
       val label = msg(1).toInt
@@ -64,7 +64,7 @@ object GraphSim {
     println("zs-log: vertex.size:" + vertex.count())
 
 
-    val tmpPair = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = partition * 6).map(s => {
+    val tmpPair = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = partition * 4).map(s => {
       val d = s.split('\t')
       val u = d(0).toLong
       val v = d(1).toLong
@@ -95,7 +95,7 @@ object GraphSim {
     println("zs-log: postGraph:" + postGraph.count())
    // postGraph.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/postGraph")
 
-    //initial sim
+    //initial
     val tempG = graph.joinVertices(postGraph)((_, postSet, buffer) => {
       (postSet._1, buffer ++ postSet._2)
     }).mapVertices((_, postSet) => {
@@ -150,6 +150,9 @@ object GraphSim {
 
     tempG.unpersist()
 
+    val initialTime = System.currentTimeMillis()
+    println("zs-log: finish initial, initial time: " + (initialTime - loadOk) / 1000 + "s")
+
     val finalGraph = initialGraph.pregel(new Array[Int](n + 1), Int.MaxValue, EdgeDirection.In)(
       (id, attr, msg) => {
         val nowSet = attr._1
@@ -185,7 +188,7 @@ object GraphSim {
 
     println("zs-log: final graph calculated, vertex size:" + finalGraph.vertices.count())
     val stopTime = System.currentTimeMillis()
-    println("zs-log: finish calculated, calculate time:" + (stopTime - loadOk) / 1000 + "s")
+    println("zs-log: finish calculated, iteration time:" + (stopTime - initialTime) / 1000 + "s")
 
     finalGraph.vertices.flatMap(v => {
       val buffer = new mutable.ArrayBuffer[(VertexId, VertexId)]()
