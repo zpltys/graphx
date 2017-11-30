@@ -34,8 +34,8 @@ object GraphSim {
   def main(args: Array[String]): Unit = {
     generatePattern()
 
-    val conf = new SparkConf()
-    val sc = new SparkContext(conf)
+    //val conf = new SparkConf()
+    val sc = new SparkContext()
 
     val startTime = System.currentTimeMillis()
 
