@@ -84,6 +84,9 @@ object GraphSim {
     val loadOk = System.currentTimeMillis()
     println("zs-log: load graph ok, load graph time:" + (loadOk - startTime) / 1000 + "s")
 
+    vertex.map(v => (v._1, v._2)).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/vertexInitial")   //id, type
+    edge.map(e => (e.srcId, e.dstId)).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/edgeInitial")    //src, dst
+
     edge.unpersist()
     vertex.unpersist()
 
@@ -92,8 +95,9 @@ object GraphSim {
       (e.srcId, mutable.Set[VertexId](e.dstId))
     }).reduceByKey(_ ++ _).cache()
 
+
     println("zs-log: postGraph:" + postGraph.count())
-   // postGraph.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/postGraph")
+    postGraph.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/postGraph")
 
     //initial
     val tempG = graph.joinVertices(postGraph)((_, postSet, buffer) => {
