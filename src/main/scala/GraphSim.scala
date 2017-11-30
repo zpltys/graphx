@@ -38,6 +38,9 @@ object GraphSim {
     generatePattern()
 
     val broadcastPre = sc.broadcast(pre)
+    val broadcastPost = sc.broadcast(post)
+    val broadcasttype = sc.broadcast(vecType)
+
     val startTime = System.currentTimeMillis()
 
     val partition = args(0).toInt
@@ -104,10 +107,14 @@ object GraphSim {
       (postSet._1, buffer ++ postSet._2)
     }).mapVertices((_, postSet) => {
       val array = new Array[Int](n + 1)
+
+      val vtype = broadcasttype.value
+      val po = broadcastPost.value
+
       for (i <- 1 to n) {
-        if (vecType(i) != postSet._1) array(i) = 0
+        if (vtype(i) != postSet._1) array(i) = 0
         else {
-          if (post(i).isEmpty) array(i) = 1
+          if (po(i).isEmpty) array(i) = 1
           else array(i) = if (postSet._2.nonEmpty) 1 else 0
         }
       }
@@ -157,7 +164,9 @@ object GraphSim {
     println("zs-log: finish initial, initial time: " + (initialTime - loadOk) / 1000 + "s")
 
     val finalGraph = initialGraph.pregel(new Array[Int](n + 1), Int.MaxValue, EdgeDirection.In)(
-      (id, attr, msg) => {
+      (_, attr, msg) => {
+        val npre = broadcastPre.value
+
         val nowSet = attr._1
         var deleteSet = attr._2
         val postArray = attr._3
@@ -167,7 +176,7 @@ object GraphSim {
           if (msg(i) != 0) {
             postArray(i) -= msg(i)
             if (postArray(i) == 0) {
-              deleteSet ++= nowSet & pre(i)
+              deleteSet ++= nowSet & npre(i)
             }
           }
         }
