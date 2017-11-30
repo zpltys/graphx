@@ -32,10 +32,10 @@ object GraphSim {
   }
 
   def main(args: Array[String]): Unit = {
-    generatePattern()
-
     val conf = new SparkConf()
     val sc = new SparkContext(conf)
+
+    generatePattern()
 
     val condMsg = conf.getAll
 
