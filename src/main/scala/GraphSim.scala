@@ -1,7 +1,6 @@
 import org.apache.spark._
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
-import System
 
 import scala.collection.mutable
 
@@ -23,10 +22,9 @@ object GraphSim {
 
     for (i <- 1 to n) {
       vecType(i) = i
-
       pre(i) = mutable.Set[VertexId]()
+      for (j <- 1 to n) {
         if (post(j).contains(i.toLong)) {
-            for (j <- 1 to n) {
           pre(i) += j.toLong
         }
       }
@@ -37,7 +35,7 @@ object GraphSim {
     generatePattern()
     val sc = new SparkContext()
 
-    //System.currentTimeMillis()
+    System.currentTimeMillis()
  /*
     val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = 10).flatMap(line => {
       val msg = line.split('\t')
