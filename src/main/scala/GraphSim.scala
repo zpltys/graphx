@@ -1,6 +1,7 @@
 import org.apache.spark._
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
+import System
 
 import scala.collection.mutable
 
@@ -24,8 +25,8 @@ object GraphSim {
       vecType(i) = i
 
       pre(i) = mutable.Set[VertexId]()
-      for (j <- 1 to n) {
         if (post(j).contains(i.toLong)) {
+            for (j <- 1 to n) {
           pre(i) += j.toLong
         }
       }
@@ -36,6 +37,8 @@ object GraphSim {
     generatePattern()
     val sc = new SparkContext()
 
+    //System.currentTimeMillis()
+ /*
     val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = 10).flatMap(line => {
       val msg = line.split('\t')
       val id = msg(0).toLong
@@ -44,6 +47,16 @@ object GraphSim {
         Some((id, (label, mutable.Set[VertexId]())))
       } else None
     }).cache()
+   */
+
+    val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = 10).map(line => {
+      val msg = line.split('\t')
+      val id = msg(0).toLong
+      val label = msg(1).toInt
+
+      (id, (label, mutable.Set[VertexId]()))
+    }).cache()
+
 
     println("zs-log: vertex.size:" + vertex.count())
 
@@ -55,9 +68,11 @@ object GraphSim {
       (u, v)
     })
 
-    val filterU = tmpPair.join(vertex).map(tuple => (tuple._2._1, tuple._1))
-    val filterV = filterU.join(vertex).map(tuple => (tuple._2._1, tuple._1))
-    val edge = filterV.map(e => Edge(e._1, e._2, 0))
+   // val filterU = tmpPair.join(vertex).map(tuple => (tuple._2._1, tuple._1))
+   // val filterV = filterU.join(vertex).map(tuple => (tuple._2._1, tuple._1))
+   // val edge = filterV.map(e => Edge(e._1, e._2, 0))
+
+    val edge = tmpPair.map(edge => Edge(edge._1, edge._2, 0))
 
     println("zs-log: edge.size:" + edge.count())
 
@@ -72,7 +87,7 @@ object GraphSim {
     }).reduceByKey(_ ++ _).cache()
 
     println("zs-log: postGraph:" + postGraph.count())
-    postGraph.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/postGraph")
+   // postGraph.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/postGraph")
 
     //initial sim
     val tempG = graph.joinVertices(postGraph)((_, postSet, buffer) => {
