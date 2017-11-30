@@ -37,19 +37,10 @@ object GraphSim {
 
     generatePattern()
 
-    for (i <- 1 to n) {
-      for (j <- pre(i)) {
-        println("zs-log: pre(" + i + "):" + j)
-      }
-    }
-
     val broadcastPre = sc.broadcast(pre)
     val startTime = System.currentTimeMillis()
 
     val partition = args(0).toInt
-
-    println("zs-log: partition:" + partition)
-
  /*
     val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = 10).flatMap(line => {
       val msg = line.split('\t')
