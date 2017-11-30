@@ -194,6 +194,6 @@ object GraphSim {
       buffer
     }).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/sim" + partition)
 
-   // sc.stop()
+   sc.stop()
   }
 }
