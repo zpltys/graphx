@@ -44,7 +44,7 @@ object GraphSim {
     val startTime = System.currentTimeMillis()
 
     val partition = args(0).toInt
-
+/*
     val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = 10).flatMap(line => {
       val msg = line.split('\t')
       val id = msg(0).toLong
@@ -53,8 +53,8 @@ object GraphSim {
         Some((id, (label, mutable.Set[VertexId]())))
       } else None
     }).cache()
-   /*
 
+*/
     val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = partition * 4).map(line => {
       val msg = line.split('\t')
       val id = msg(0).toLong
@@ -62,9 +62,9 @@ object GraphSim {
 
       (id, (label, mutable.Set[VertexId]()))
     }).cache()
-*/
 
-    println("zs-log: vertex.size:" + vertex.count())
+
+    //println("zs-log: vertex.size:" + vertex.count())
 
 
     val tmpPair = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = partition * 4).map(s => {
@@ -74,11 +74,11 @@ object GraphSim {
       (u, v)
     })
 
-    val filterU = tmpPair.join(vertex).map(tuple => (tuple._2._1, tuple._1))
-    val filterV = filterU.join(vertex).map(tuple => (tuple._2._1, tuple._1))
-    val edge = filterV.map(e => Edge(e._1, e._2, 0)).cache()
+    //val filterU = tmpPair.join(vertex).map(tuple => (tuple._2._1, tuple._1))
+    //val filterV = filterU.join(vertex).map(tuple => (tuple._2._1, tuple._1))
+    //val edge = filterV.map(e => Edge(e._1, e._2, 0)).cache()
 
-    //val edge = tmpPair.map(edge => Edge(edge._1, edge._2, 0)).cache()
+    val edge = tmpPair.map(edge => Edge(edge._1, edge._2, 0)).cache()
 
     println("zs-log: edge.size:" + edge.count())
 
@@ -87,8 +87,8 @@ object GraphSim {
     val loadOk = System.currentTimeMillis()
     println("zs-log: load graph ok, load graph time:" + (loadOk - startTime) / 1000 + "s")
 
-    vertex.map(v => (v._1, v._2)).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/vertexInitial")   //id, type
-    edge.map(e => (e.srcId, e.dstId)).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/edgeInitial")    //src, dst
+   // vertex.map(v => (v._1, v._2)).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/vertexInitial")   //id, type
+   // edge.map(e => (e.srcId, e.dstId)).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/edgeInitial")    //src, dst
 
     edge.unpersist()
     vertex.unpersist()
@@ -100,7 +100,7 @@ object GraphSim {
 
 
     println("zs-log: postGraph:" + postGraph.count())
-    postGraph.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/postGraph")
+  //  postGraph.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/postGraph")
 
     //initial
     val tempG = graph.joinVertices(postGraph)((_, postSet, buffer) => {
@@ -155,7 +155,7 @@ object GraphSim {
       (attr._1, deleteSet, message)
     }).cache()
 
-    initialGraph.vertices.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/initialGraph")
+   // initialGraph.vertices.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/initialGraph")
 
     tempG.unpersist()
 
@@ -210,7 +210,7 @@ object GraphSim {
         buffer.append((s, v._1))
       }
       buffer
-    }).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/sim" + partition)
+    })//.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/sim" + partition)
 
    sc.stop()
   }
