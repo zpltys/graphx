@@ -52,7 +52,7 @@ object GraphSim {
     }).cache()
    */
 
-    val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = partition).map(line => {
+    val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = partition * 2).map(line => {
       val msg = line.split('\t')
       val id = msg(0).toLong
       val label = msg(1).toInt
@@ -64,7 +64,7 @@ object GraphSim {
     println("zs-log: vertex.size:" + vertex.count())
 
 
-    val tmpPair = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = partition).map(s => {
+    val tmpPair = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = partition * 2).map(s => {
       val d = s.split('\t')
       val u = d(0).toLong
       val v = d(1).toLong
