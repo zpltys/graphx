@@ -37,10 +37,10 @@ object GraphSim {
 
     generatePattern()
 
-    val condMsg = conf.getAll
-
-    for ((title, msg) <- condMsg) {
-      println("zs-log: " + title + ":" + msg)
+    for (i <- 1 to n) {
+      for (j <- pre(i)) {
+        println("zs-log: pre(" + i + "):" + j)
+      }
     }
 
     val startTime = System.currentTimeMillis()
