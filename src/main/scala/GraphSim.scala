@@ -39,7 +39,9 @@ object GraphSim {
 
     val condMsg = conf.getAll
 
-    println("zs-log:" + condMsg)
+    for ((title, msg) <- condMsg) {
+      println("zs-log: " + title + ":" + msg)
+    }
 
     val startTime = System.currentTimeMillis()
 
