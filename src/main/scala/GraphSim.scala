@@ -15,7 +15,7 @@ object GraphSim {
     post(2) = mutable.Set[VertexId](4L, 8L)
     post(3) = mutable.Set[VertexId](4L, 7L)
     post(4) = mutable.Set[VertexId](1L, 8L)
-    post(5) = mutable.Set[VertexId](3L, 6L, 5L)
+    post(5) = mutable.Set[VertexId](3L, 6L, 8L)
     post(6) = mutable.Set[VertexId](2L, 7L)
     post(7) = mutable.Set[VertexId](4L)
     post(8) = mutable.Set[VertexId](4L)
@@ -43,6 +43,7 @@ object GraphSim {
       }
     }
 
+    val broadcastPre = sc.broadcast(pre)
     val startTime = System.currentTimeMillis()
 
     val partition = args(0).toInt
@@ -142,9 +143,12 @@ object GraphSim {
       (nowSet, mutable.Set[VertexId](), new Array[Int](n + 1))
     }).joinVertices(postCount)((_, attr, message) => {
       val deleteSet = mutable.Set[VertexId]()
+
+      val hp = broadcastPre.value    // use broadcast
+
       for (i <- 1 to n) {
         if (message(i) == 0) {
-          for (j <- pre(i)) {
+          for (j <- hp(i)) {
             if (attr._1.contains(j))
               deleteSet += j
           }
