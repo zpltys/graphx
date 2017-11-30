@@ -148,6 +148,8 @@ object GraphSim {
       (attr._1, deleteSet, message)
     }).cache()
 
+    initialGraph.vertices.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/initialGraph")
+
     tempG.unpersist()
 
     println("zs-log: initial count: " + initialGraph.vertices.count())
