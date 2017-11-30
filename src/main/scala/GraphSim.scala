@@ -34,8 +34,12 @@ object GraphSim {
   def main(args: Array[String]): Unit = {
     generatePattern()
 
-    //val conf = new SparkConf()
-    val sc = new SparkContext()
+    val conf = new SparkConf()
+    val sc = new SparkContext(conf)
+
+    val condMsg = conf.getAll
+
+    println("zs-log:" + condMsg)
 
     val startTime = System.currentTimeMillis()
 
@@ -134,17 +138,17 @@ object GraphSim {
         if (array(i) == 1) nowSet.add(i)
       }
       (nowSet, mutable.Set[VertexId](), new Array[Int](n + 1))
-    }).joinVertices(postCount)((_, attr, msg) => {
+    }).joinVertices(postCount)((_, attr, message) => {
       val deleteSet = mutable.Set[VertexId]()
       for (i <- 1 to n) {
-        if (msg(i) == 0) {
+        if (message(i) == 0) {
           for (j <- pre(i)) {
             if (attr._1.contains(j))
               deleteSet += j
           }
         }
       }
-      (attr._1, deleteSet, msg)
+      (attr._1, deleteSet, message)
     })
 
     tempG.unpersist()
