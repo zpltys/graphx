@@ -15,7 +15,7 @@ object GraphSim {
     post(2) = mutable.Set[VertexId](4L, 8L)
     post(3) = mutable.Set[VertexId](4L, 7L)
     post(4) = mutable.Set[VertexId](1L, 8L)
-    post(5) = mutable.Set[VertexId](3L, 6L, 8L)
+    post(5) = mutable.Set[VertexId](3L, 6L, 5L)
     post(6) = mutable.Set[VertexId](2L, 7L)
     post(7) = mutable.Set[VertexId](4L)
     post(8) = mutable.Set[VertexId](4L)
