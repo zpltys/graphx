@@ -1,6 +1,7 @@
 import org.apache.spark._
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
+import org.apache.log4j._
 
 import scala.collection.mutable
 
@@ -35,11 +36,13 @@ object GraphSim {
     val conf = new SparkConf()
     val sc = new SparkContext(conf)
 
+    sc.setLogLevel("ALL")
+
     generatePattern()
 
     val broadcastPre = sc.broadcast(pre)
     val broadcastPost = sc.broadcast(post)
-    val broadcasttype = sc.broadcast(vecType)
+    val broadcastType = sc.broadcast(vecType)
 
     val startTime = System.currentTimeMillis()
 
@@ -108,7 +111,7 @@ object GraphSim {
     }).mapVertices((_, postSet) => {
       val array = new Array[Int](n + 1)
 
-      val vtype = broadcasttype.value
+      val vtype = broadcastType.value
       val po = broadcastPost.value
 
       for (i <- 1 to n) {
