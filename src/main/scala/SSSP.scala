@@ -27,7 +27,7 @@ object SSSP {
     println("zs-log: vertex size:" + vertex.count())
 
     val edge = data.map(e => {
-      Edge(e._1, e._2, 1.0)
+      Edge(e._1, e._2, 1)
     }).cache()
     println("zs-log: edge size:" + edge.count())
     val loadOk = System.currentTimeMillis()
@@ -37,16 +37,16 @@ object SSSP {
 
     // $example on$
     // A graph with edge attributes containing distances
-    val graph: Graph[Long, Double] = Graph(vertex, edge)
+    val graph: Graph[Long, Int] = Graph(vertex, edge)
     vertex.unpersist()
     edge.unpersist()
 
     val sourceId: VertexId = 1 // The ultimate source
     // Initialize the graph such that all vertices except the root have distance infinity.
     val initialGraph = graph.mapVertices((id, _) =>
-      if (id == sourceId) 0.0 else Double.PositiveInfinity)
+      if (id == sourceId) 0 else Int.MaxValue)
 
-    val sssp = initialGraph.pregel(Double.PositiveInfinity)(
+    val sssp = initialGraph.pregel(Int.MaxValue)(
       (id, dist, newDist) => math.min(dist, newDist), // Vertex Program
       triplet => { // Send Message
         if (triplet.srcAttr + triplet.attr < triplet.dstAttr) {
