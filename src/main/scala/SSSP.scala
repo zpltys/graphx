@@ -12,8 +12,9 @@ object SSSP {
 
     val start = System.currentTimeMillis()
 
-    sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/USA-road-d.USA.gr", minPartitions = partition).map(v => v.split(" ")(1).toLong).distinct().saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/graphNodes")
-    /*
+   // sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/USA-road-d.USA.gr", minPartitions = partition).map(v => v.split(" ")(1).toLong).distinct().saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/graphNodes")
+
+    val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/graphNodes").map(v => (v.toLong, 1L))
     println("zs-log: vertex size:" + vertex.count())
 
     val edge = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/USA-road-d.USA.gr", minPartitions = partition).map(s => {
@@ -68,7 +69,7 @@ object SSSP {
     println("zs-log: run time" + (stopTime - loadOk) / 1000 + "s")
 
     println("zs-log: total time:" + (stopTime - start) / 1000 + "s")
-*/
+
     sc.stop()
   }
 }
