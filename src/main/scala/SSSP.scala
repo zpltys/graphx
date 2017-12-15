@@ -12,7 +12,7 @@ object SSSP {
 
     val start = System.currentTimeMillis()
 
-    sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/USA-road-d.USA.gr", minPartitions = partition).map(v => v.split(" ")(1).toLong).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/graphNodes")
+    sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/USA-road-d.USA.gr", minPartitions = partition).map(v => v.split(" ")(1).toLong).distinct().saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/graphNodes")
     /*
     println("zs-log: vertex size:" + vertex.count())
 
