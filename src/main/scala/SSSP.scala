@@ -22,6 +22,8 @@ object SSSP {
       Seq((e._1, 1L), (e._2, 1L))
     }).distinct().cache()
 
+    vertex.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/LiveJournalNodes")
+
     println("zs-log: vertex size:" + vertex.count())
 
     val edge = data.map(e => {
