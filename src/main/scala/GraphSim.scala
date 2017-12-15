@@ -1,7 +1,6 @@
 import org.apache.spark._
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
-import org.apache.log4j._
 
 import scala.collection.mutable
 
