@@ -50,8 +50,20 @@ object SSSP {
       },
       (a, b) => math.min(a, b) // Merge Message
     ).cache()
-    sssp.vertices.map( vertex => (vertex._1, vertex._2)).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/ssspResult/result" + partition + ".txt")
+    val totalLen = sssp.vertices.map( v => {
+      var a = 0
+      if(v._2 == Int.MaxValue) {
+        a = 100
+      } else {
+        a = v._2
+      }
+      a
+    }).reduce(_ + _)
+    println("zs-log: totalLen:" + totalLen)
+
     val stopTime = System.currentTimeMillis()
+
+    println("zs-log: run time" + (stopTime - loadOk) / 1000 + "s")
 
     println("zs-log: total time:" + (stopTime - start) / 1000 + "s")
 
