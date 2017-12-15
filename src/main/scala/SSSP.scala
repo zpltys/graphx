@@ -11,29 +11,22 @@ object SSSP {
     val partition = args(0).toInt
 
     val start = System.currentTimeMillis()
-    val data: RDD[(VertexId, VertexId)] = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = partition).map(s => {
+
+    val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/LiveJournalNodes/*", minPartitions = partition).map(v => (v.toLong, 1L)).cache()
+    println("zs-log: vertex size:" + vertex.count())
+
+    val edge = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = partition).map(s => {
       val d = s.split('\t')
       val u = d(0).toLong
       val v = d(1).toLong
-      (u, v)
-    }).cache()
-
-    val vertex = data.flatMap(e => {
-      Seq((e._1, 1L), (e._2, 1L))
-    }).distinct().cache()
-
-    vertex.map(_._1).saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/LiveJournalNodes")
-
-    println("zs-log: vertex size:" + vertex.count())
-
-    val edge = data.map(e => {
-      Edge(e._1, e._2, 1)
+      Edge(u, v, 1)
     }).cache()
     println("zs-log: edge size:" + edge.count())
+
     val loadOk = System.currentTimeMillis()
     println("zs-log: load time:" + (loadOk - start) / 1000 + "s")
 
-    data.unpersist()
+
 
     // $example on$
     // A graph with edge attributes containing distances
