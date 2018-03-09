@@ -1,4 +1,5 @@
 // $example off$
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.graphx._
 
@@ -15,18 +16,14 @@ object PageRank {
     // Creates a SparkSession.
     val startTime = System.currentTimeMillis()
 
-    val spark = SparkSession
-      .builder
-      .appName(s"${this.getClass.getSimpleName}")
-      .getOrCreate()
-    val sc = spark.sparkContext
+    val conf = new SparkConf()
+    val sc = new SparkContext(conf)
 
     println("start")
     val partition = args(0).toInt
     // $example on$
     // Load the edges as a graph
     val source = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = partition * 4).map(line => {
-      line.split(" ")
       (line(0).toLong, line(1).toLong)
     }).cache()
 
