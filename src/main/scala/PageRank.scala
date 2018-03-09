@@ -24,7 +24,8 @@ object PageRank {
     // $example on$
     // Load the edges as a graph
     val source = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = partition * 4).map(line => {
-      (line(0).toLong, line(1).toLong)
+      val l = line.split(" ")
+      (l(0).toLong, l(1).toLong)
     }).cache()
 
     val vertex = source.flatMap(u => {
