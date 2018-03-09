@@ -23,7 +23,18 @@ object PageRank {
     val partition = args(0).toInt
     // $example on$
     // Load the edges as a graph
-    val graph = GraphLoader.edgeListFile(sc, "alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt")
+    val source = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = partition * 4).map(line => {
+      (line(0).toLong, line(1).toLong)
+    }).cache()
+
+    val vertex = source.flatMap(u => {
+      val tmp = Array((u._1, 0), (u._2, 0))
+      tmp
+    }).distinct()
+    val edge = source.map(l => Edge(l._1, l._2, 0))
+    println("zs-log: vertex sizs:" + vertex.count())
+    println("zs-log: edge sizes:" + edge.count())
+    val graph = Graph(vertex, edge)
 
     val initialTime = System.currentTimeMillis()
     println("zs-log: finish load graph, load time:" + (initialTime - startTime) / 1000 + "s")
