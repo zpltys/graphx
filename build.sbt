@@ -7,6 +7,7 @@ resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/mave
 
 libraryDependencies += "org.apache.spark" %% "spark-core" % "2.0.0" % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-graphx" % "2.0.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.0.0" % "provided"
 //libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.0.0"
 
 //libraryDependencies += "graphframes" % "graphframes" % "0.5.0-spark2.0-s_2.11"
