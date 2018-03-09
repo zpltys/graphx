@@ -41,7 +41,9 @@ object PageRank {
     // Run PageRank
     val ranks = graph.pageRank(0.01)
     // Join the ranks with the usernames
-    ranks.vertices.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/PageRankResult")
+    val size = ranks.vertices.count()
+    println("zs-log: ans size:" + size)
+    //ranks.vertices.saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/PageRankResult")
     // $example off$
 
     val stopTime = System.currentTimeMillis()
