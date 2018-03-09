@@ -7,7 +7,7 @@ object SSSP {
   def main(args: Array[String]): Unit = {
     // Creates a SparkSession.
     val conf = new SparkConf()
-    val sc = new SparkContext()
+    val sc = new SparkContext(conf)
     val partition = args(0).toInt
 
     val start = System.currentTimeMillis()

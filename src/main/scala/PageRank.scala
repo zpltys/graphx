@@ -21,10 +21,12 @@ object PageRank {
       .getOrCreate()
     val sc = spark.sparkContext
 
+    println("start")
     // $example on$
     // Load the edges as a graph
     val graph = GraphLoader.edgeListFile(sc, "alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt")
 
+    /*
     val initialTime = System.currentTimeMillis()
     println("zs-log: finish load graph, load time:" + (initialTime - startTime) / 1000 + "s")
     // Run PageRank
@@ -35,6 +37,8 @@ object PageRank {
 
     val stopTime = System.currentTimeMillis()
     println("zs-log: finish calculated, iteration time:" + (stopTime - initialTime) / 1000 + "s")
+    */
+    println("vertex count:" + graph.vertices.count())
     spark.stop()
   }
 }
