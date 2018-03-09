@@ -45,6 +45,6 @@ object PageRank {
     val stopTime = System.currentTimeMillis()
     println("zs-log: finish calculated, iteration time:" + (stopTime - initialTime) / 1000 + "s")
 
-    spark.stop()
+    sc.stop()
   }
 }
