@@ -24,7 +24,7 @@ object PageRank {
     // $example on$
     // Load the edges as a graph
     val source = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = partition * 4).map(line => {
-      val l = line.split(" ")
+      val l = line.split("\t")
       (l(0).toLong, l(1).toLong)
     }).cache()
 
