@@ -14,10 +14,11 @@ object SSSP {
 
    // sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/USA-road-d.USA.gr", minPartitions = partition).map(v => v.split(" ")(1).toLong).distinct().saveAsTextFile("alluxio://hadoopmaster:19998/zpltys/graphData/graphNodes")
 
-    val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/graphNodes").map(v => (v.toLong, 1L))
+    //val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/graphNodes").map(v => (v.toLong, 1L))
+    val vertex = sc.textFile("file:///mnt/nfs/zpltys/GRAPE_DATA/USARoad/nodes").map(v => (v.toLong, 1L))
     println("zs-log: vertex size:" + vertex.count())
 
-    val edge = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/USA-road-d.USA.gr", minPartitions = partition).map(s => {
+    val edge = sc.textFile("file:///mnt/nfs/zpltys/GRAPE_DATA/USARoad/USA-road-d.USA.gr", minPartitions = partition).map(s => {
       val d = s.split(' ')
       val u = d(1).toLong
       val v = d(2).toLong
