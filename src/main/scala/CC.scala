@@ -1,21 +1,10 @@
-// $example off$
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.graphx._
 
-
-/**
-  * A PageRank example on social network dataset
-  * Run with
-  * {{{
-  * bin/run-example graphx.PageRankExample
-  * }}}
-  */
-object PageRank {
+object CC {
   def main(args: Array[String]): Unit = {
-    // Creates a SparkSession.
     val startTime = System.currentTimeMillis()
-
     val conf = new SparkConf()
     val sc = new SparkContext(conf)
 
@@ -39,15 +28,14 @@ object PageRank {
 
     val initialTime = System.currentTimeMillis()
     println("zs-log: finish load graph, load time:" + (initialTime - startTime) / 1000 + "s")
-    // Run PageRank
-    val ranks = graph.pageRank(0.01)
-    // Join the ranks with the usernames
-    val size = ranks.vertices.count()
+    // Run CC
+    val cc = graph.connectedComponents().vertices
+    val size = cc.vertices.count()
     println("zs-log: ans size:" + size)
 
     val stopTime = System.currentTimeMillis()
     println("zs-log: finish calculated, iteration time:" + (stopTime - initialTime) / 1000 + "s")
-
+    // $example off$
     sc.stop()
   }
 }
