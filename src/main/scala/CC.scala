@@ -30,7 +30,7 @@ object CC {
     println("zs-log: finish load graph, load time:" + (initialTime - startTime) / 1000 + "s")
     // Run CC
     val cc = graph.connectedComponents().vertices
-    val size = cc.vertices.count()
+    val size = cc.count()
     println("zs-log: ans size:" + size)
 
     val stopTime = System.currentTimeMillis()
