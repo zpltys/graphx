@@ -57,19 +57,21 @@ object GraphSim {
     }).cache()
 
 */
-    val vertex = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/label.txt", minPartitions = partition * 4).map(line => {
+    val vertex = sc.textFile("file:///mnt/nfs/zpltys/GRAPE_DATA/liveJournal/soc-LiveJournal1.txt", minPartitions = partition * 4).flatMap(line => {
       val msg = line.split('\t')
-      val id = msg(0).toLong
-      val label = msg(1).toInt
+      val u = msg(0).toLong
+      val v = msg(1).toLong
 
+      Array(u, v)
+    }).distinct().map(u => {
+      val label = u % 100
       (id, (label, mutable.Set[VertexId]()))
     }).cache()
 
+    println("zs-log: vertex.size:" + vertex.count())
 
-    //println("zs-log: vertex.size:" + vertex.count())
 
-
-    val tmpPair = sc.textFile("alluxio://hadoopmaster:19998/zpltys/graphData/soc-LiveJournal1.txt", minPartitions = partition * 4).map(s => {
+    val tmpPair = sc.textFile("file:///mnt/nfs/zpltys/GRAPE_DATA/liveJournal/soc-LiveJournal1.txt", minPartitions = partition * 4).map(s => {
       val d = s.split('\t')
       val u = d(0).toLong
       val v = d(1).toLong
