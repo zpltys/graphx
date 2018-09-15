@@ -65,7 +65,7 @@ object GraphSim {
       Array(u, v)
     }).distinct().map(u => {
       val label = u % 100
-      (id, (label, mutable.Set[VertexId]()))
+      (u, (label, mutable.Set[VertexId]()))
     }).cache()
 
     println("zs-log: vertex.size:" + vertex.count())
